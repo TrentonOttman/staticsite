@@ -152,7 +152,10 @@ def heading_to_tag_and_text(heading):
 
 def code_to_text(code):
     split_code = list(code)
-    new_code = split_code[3:-3]
+    if split_code[3] == '\n':
+        new_code = split_code[4:-3]
+    else:
+        new_code = split_code[3:-3]
     code_text = "".join(new_code)
     return code_text
 
@@ -160,7 +163,7 @@ def quote_to_text(quote):
     lines = quote.split("\n")
     new_lines = []
     for line in lines:
-        new_line = line[1:]
+        new_line = line[2:]
         new_lines.append(new_line)
     text = "\n".join(new_lines)
     return text

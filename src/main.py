@@ -29,10 +29,52 @@ def source_to_destination(source, destination, current_path=None):
         path = os.path.join(current_path, file)
         source_to_destination(source, destination, path)
 
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    f = open(from_path)
+    source_data = f.read()
+    f.close()
+    f = open(template_path)
+    template_data = f.read()
+    f.close()
+    html_node = markdown_to_html_node(source_data)
+    html = html_node.to_html()
+    title = extract_title(source_data)
+    template_data = template_data.replace("{{ Title }}", title, 1)
+    template_data = template_data.replace("{{ Content }}", html, 1)
+    f = open(dest_path, "w")
+    f.write(template_data)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    current_path = dir_path_content
+    if os.path.isfile(current_path) == True and current_path[-3:] != ".md":
+        raise Exception("File not markdown or directory")
+
+    if current_path[-3:] == ".md":
+        fixed_path = dest_dir_path.replace(".md", ".html", 1)
+        generate_page(current_path, template_path, fixed_path)
+        return
+
+    if os.path.isfile(current_path) != True and current_path.find("/") != -1:
+        slash_index = current_path.find("/")
+        destination = dest_dir_path + current_path[slash_index:]
+        os.mkdir(dest_dir_path)
+
+    file_list = os.listdir(dir_path_content)
+    for file in file_list:
+        path = os.path.join(current_path, file)
+        slash_index = path.rfind("/")
+        destination = dest_dir_path + path[slash_index:]
+        generate_pages_recursive(path, template_path, destination)
+
 def main():
-    # source_to_destination("static", "public")
-    markdown = "### This should not work"
-    print(extract_title(markdown))
+    SOURCE_PATH = "static"
+    DESTINATION_PATH = "public"
+    
+    shutil.rmtree(DESTINATION_PATH)
+    os.mkdir(DESTINATION_PATH)
+    source_to_destination(SOURCE_PATH, DESTINATION_PATH)
+    generate_pages_recursive("content", "template.html", "public")
 
 if __name__ == "__main__":
     main()
