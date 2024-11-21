@@ -51,6 +51,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
         raise Exception("File not markdown or directory")
 
     if current_path[-3:] == ".md":
+        if dest_dir_path.find(".md") == -1:
+            dest_dir_path = dest_dir_path + "/" + dir_path_content
         fixed_path = dest_dir_path.replace(".md", ".html", 1)
         generate_page(current_path, template_path, fixed_path)
         return
